@@ -1,0 +1,42 @@
+{
+    "model_type": "RandomForestClassifier",
+    "params": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": "balanced_subsample",
+        "criterion": "gini",
+        "max_depth": null,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 500,
+        "n_jobs": -1,
+        "oob_score": true,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+    },
+    "feature_importances": [
+        0.03723603653223272,
+        0.05981781979230179,
+        0.003509771090366684,
+        0.004504691237530495,
+        0.010917832368537127,
+        0.006142036884604771,
+        0.0020908556544981245,
+        0.008811126969818991,
+        0.012575419834535978,
+        0.031105944724750298,
+        0.02793599244019273,
+        0.07751661912286874,
+        0.15981425696815987,
+        0.2750915279105401,
+        0.2770280878524596,
+        0.00590198061660202
+    ]
+}

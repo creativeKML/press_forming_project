@@ -1,0 +1,14 @@
+
+{
+"data":[
+    
+  { "name": "정상", "value": 6034 },
+  { "name": "밀림", "value": 941 },
+  { "name": "도색불량", "value": 417 },
+  { "name": "뒤틀림", "value": 817 },
+  { "name": "오산", "value": 421 },
+  { "name": "찍힘", "value": 604 },
+  { "name": "이물질", "value": 496 },
+  { "name": "역삽", "value": 836 }]
+}
+

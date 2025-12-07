@@ -1,0 +1,277 @@
+// src/layout.jsx
+import React, { useMemo, useState } from "react";
+import "./layout.css";
+import {
+  ResponsiveContainer,
+  PieChart, Pie, Cell, Tooltip, Legend,
+  LineChart, Line, CartesianGrid, XAxis, YAxis,
+  AreaChart, Area
+} from "recharts";
+
+/* ========================= 설정 ========================= */
+const HEAD_KEYS  = ["EX1.H2_PV", "EX1.H3_PV", "EX1.H4_PV"];
+const SCREW_KEYS = ["EX1.Z1_PV", "EX1.Z2_PV", "EX1.Z4_PV"];
+const COLORS = [
+  "#7fd6a0","#ff9aa2","#7fb6cf","#f6d365","#ff6b6b",
+  "#6bc7ad","#bdb2ff","#a0e8af","#6aa9ff"
+];
+const API_BASE = "http://127.0.0.1:5001";
+/* ======================================================= */
+
+export default function Layout() {
+  // 날짜(프런트에서는 조회 범위만 유지 — 서버는 전체 CSV 기반으로 집계 응답)
+  const [startDate, setStartDate] = useState("2025-03-01");
+  const [endDate, setEndDate]     = useState("2025-03-24");
+
+  // JSON(옵션)
+  const [hasJson, setHasJson] = useState(false);
+  const [jsonObj, setJsonObj] = useState(null);
+
+  // KPI/차트 상태
+  const [kpis, setKpis] = useState({
+    totalInspects: 0,
+    normalCount:   0,
+    defectTotal:   0,
+    defectRatePct: 0,
+    criticalDefect: "-",
+    hasCsv: false,
+  });
+  const [donutData, setDonutData] = useState([]);
+  const [rateData,  setRateData]  = useState([]);
+  const [headData,  setHeadData]  = useState([]);
+  const [screwData, setScrewData] = useState([]);
+
+  // ===== JSON 업로드 (옵션: 중앙라벨 등 추가 활용 시) =====
+  const onPickJson = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const obj  = JSON.parse(text);
+      setJsonObj(obj);
+      setHasJson(true);
+      alert("JSON 업로드 완료 ✅");
+    } catch (err) {
+      console.error(err);
+      alert("❌ JSON 파싱 실패: 파일 형식을 확인하세요.");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  // ===== CSV 업로드 → 서버로 전송 → 응답으로 상태 반영 =====
+  const onPickCsv = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch(`${API_BASE}/predict_file`, {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.json())
+    .then(payload => {
+      if (payload.error) {
+        alert(`서버 오류: ${payload.error}\n누락 컬럼: ${(payload.missing||[]).join(", ")}`);
+        return;
+      }
+
+      // 1) KPI
+      if (payload.kpis) {
+        setKpis(k => ({ ...k, ...payload.kpis }));
+      }
+
+      // 2) 차트 데이터
+      setDonutData(payload.donutData || []);
+      setRateData(payload.rateData || []);
+      setHeadData(payload.headData || []);
+      setScrewData(payload.screwData || []);
+
+      alert("모델 예측 기반 대시보드 데이터 반영 완료 ✅");
+      e.target.value = "";
+    })
+    .catch(err => {
+      console.error(err);
+      alert("서버 호출 실패");
+    });
+  };
+
+  // (선택) 조회 버튼 — 현재는 서버 집계 기반이라 프런트에서 별도 필터 없음
+  const onQuery = () => {
+    if (!kpis.hasCsv) {
+      alert("먼저 CSV를 업로드하세요.");
+      return;
+    }
+    alert(`조회 기간(프런트 표시용): ${startDate} ~ ${endDate}\n※ 현재 데이터는 서버 집계 결과를 사용합니다.`);
+  };
+
+  // PPM = (불량 / 생산) × 1,000,000 (서버에서 kpis를 받아 계산)
+  const ppmValue = useMemo(() => {
+    const { defectTotal, totalInspects } = kpis;
+    if (!totalInspects) return 0;
+    return Math.round((defectTotal / totalInspects) * 1_000_000);
+  }, [kpis]);
+
+  return (
+    <div className="dash">
+      {/* 헤더 */}
+      <header className="dash__header">
+        <h1 style={{ color: "#eaf2f6" }}>소성가공 품질보증 모니터링 대시보드</h1>
+        <div className="dash__controls">
+          <label className="dash__filter">
+            <span>시작</span>
+            <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}/>
+          </label>
+          <span className="dash__tilde">-</span>
+          <label className="dash__filter">
+            <span>종료</span>
+            <input type="date" value={endDate} onChange={e=>setEndDate(e.target.value)}/>
+          </label>
+
+          {/* JSON 업로드(옵션) */}
+          <label className="upload btn btn--upload" title="JSON 업로드" style={{marginLeft:8}}>
+            JSON 업로드
+            <input type="file" accept=".json,application/json" onChange={onPickJson}/>
+          </label>
+
+          {/* CSV 업로드 → 서버 예측 */}
+          <label className="upload btn btn--upload" title="CSV 업로드(서버 예측)" style={{marginLeft:8}}>
+            CSV 업로드
+            <input type="file" accept=".csv,text/csv" onChange={onPickCsv}/>
+          </label>
+
+          <button className="btn btn--primary" onClick={onQuery} style={{marginLeft:8}}>
+            조회
+          </button>
+        </div>
+      </header>
+
+      {/* KPI 6개 */}
+      <section className="kpis kpis--six">
+        <div className="kpi">
+          <div className="kpi__label">총 검사수</div>
+          <div className="kpi__value">{kpis.totalInspects.toLocaleString()}</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi__label">정상개수</div>
+          <div className="kpi__value">{kpis.normalCount.toLocaleString()}</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi__label">총불량개수</div>
+          <div className="kpi__value">{kpis.defectTotal.toLocaleString()}</div>
+        </div>
+        <div className="kpi kpi--accent">
+          <div className="kpi__label">크리티컬 불량영역</div>
+          <div className="kpi__value">{kpis.criticalDefect}</div>
+        </div>
+        <div className="kpi kpi--accent">
+          <div className="kpi__label">불량률</div>
+          <div className="kpi__value">{kpis.defectRatePct}%</div>
+        </div>
+        <div className="kpi kpi--ghost">
+          <div className="kpi__label">데이터</div>
+          <div className="kpi__value">
+            CSV: {kpis.hasCsv ? "적용" : "없음"} / JSON: {hasJson ? "적용" : "없음"}
+          </div>
+        </div>
+      </section>
+
+      {/* 1행: (좌) PPM (우) 도넛 */}
+      <section className="grid-2">
+        <div className="panel">
+          <div className="panel__title">PPM 불량률</div>
+          <div className="panel__sub">PPM = (불량 / 생산) × 1,000,000</div>
+          <div className="ppmbox">
+            <div className="ppm__value">{ppmValue.toLocaleString()} PPM</div>
+            <div className="ppm__sub">
+              불량 {kpis.defectTotal.toLocaleString()} / 생산 {kpis.totalInspects.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel__title">불량 비율 (Donut)</div>
+          <div className="chart">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={donutData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius="55%"
+                  outerRadius="80%"
+                  paddingAngle={2}
+                >
+                  {donutData.map((_,i)=>(<Cell key={i} fill={COLORS[i%COLORS.length]}/>))}
+                </Pie>
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{color:"#cfe0ea"}}/>
+                <Tooltip contentStyle={{background:"#2b3a45",border:"1px solid #49616f",borderRadius:8,color:"#eef5f8"}}/>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+
+      {/* 2행: 실시간 불량 모니터링 */}
+      <section className="grid-1">
+        <div className="panel">
+          <div className="panel__title">실시간 불량 모니터링 (불량률 · 분 단위)</div>
+          <div className="chart chart--line">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={rateData}>
+                <CartesianGrid stroke="#57707e" strokeDasharray="3 3" opacity={0.25}/>
+                <XAxis dataKey="time" stroke="#cfe0ea"/>
+                <YAxis domain={[0, "auto"]} stroke="#cfe0ea"/>
+                <Tooltip contentStyle={{background:"#2b3a45",border:"1px solid #49616f",borderRadius:8,color:"#eef5f8"}}/>
+                <Line type="monotone" dataKey="rate" dot={false} stroke="#a0e8af" strokeWidth={3}/>
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+
+      {/* 3행: (좌) 압출헤드 (우) 스크류 */}
+      <section className="grid-2">
+        <div className="panel">
+          <div className="panel__title">CSV 값 활용 (압출헤드온도): {HEAD_KEYS.join(", ")}</div>
+          <div className="chart-scroll">
+            <div className="chart-scroll__inner" style={{width:Math.max(900,headData.length*18)}}>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={headData}>
+                  <CartesianGrid stroke="#57707e" strokeDasharray="3 3" opacity={0.25}/>
+                  <XAxis dataKey="time" stroke="#cfe0ea"/><YAxis stroke="#cfe0ea"/>
+                  <Tooltip contentStyle={{background:"#2b3a45",border:"1px solid #49616f",borderRadius:8,color:"#eef5f8"}}/>
+                  {HEAD_KEYS.filter(k=>headData[0]?.[k]!==undefined).map((k,i)=>(
+                    <Area key={k} type="monotone" dataKey={k} stackId="H"
+                      fill={COLORS[(i+2)%COLORS.length]} stroke={COLORS[(i+2)%COLORS.length]} fillOpacity={0.45}/>
+                  ))}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel__title">CSV 값 활용 (스크류피쳐): {SCREW_KEYS.join(", ")}</div>
+          <div className="chart-scroll">
+            <div className="chart-scroll__inner" style={{width:Math.max(900,screwData.length*18)}}>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={screwData}>
+                  <CartesianGrid stroke="#57707e" strokeDasharray="3 3" opacity={0.25}/>
+                  <XAxis dataKey="time" stroke="#cfe0ea"/><YAxis stroke="#cfe0ea"/>
+                  <Tooltip contentStyle={{background:"#2b3a45",border:"1px solid #49616f",borderRadius:8,color:"#eef5f8"}}/>
+                  {SCREW_KEYS.filter(k=>screwData[0]?.[k]!==undefined).map((k,i)=>(
+                    <Area key={k} type="monotone" dataKey={k} stackId="Z"
+                      fill={COLORS[(i+5)%COLORS.length]} stroke={COLORS[(i+5)%COLORS.length]} fillOpacity={0.45}/>
+                  ))}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

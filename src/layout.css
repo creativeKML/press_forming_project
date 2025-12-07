@@ -1,0 +1,445 @@
+/* Custom Properties for Theming */
+:root {
+    --bg-primary: #1e1e2f; /* Dark background */
+    --bg-secondary: #27293d; /* Panel background */
+    --bg-accent: #383a54; /* Border/separator color */
+
+    --text-primary: #cfe0ea; /* Light text */
+    --text-secondary: #7f8fa4; /* Sub text */
+
+    --color-primary: #5bc0be; /* Primary action/info color (e.g., buttons) */
+    --color-success: #7fd6a0; /* Normal/Success */
+    --color-warn: #ffcc00; /* Light Warning */
+    --color-danger: #e23b47; /* Danger/Alert (강조된 빨간색) */
+
+    --color-pill-danger: #aa1111; /* 알림창 텍스트/배경용 진한 빨강 */
+    --color-pill-text: #fff; /* 알림창 텍스트 색상 */
+}
+
+/* ======================================================= */
+/* 0. Common Styles */
+/* ======================================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 20px;
+}
+
+h1.title {
+    font-size: 1.8rem;
+    color: var(--color-success);
+    margin-right: 20px;
+    font-weight: 300;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--bg-accent);
+    margin: 20px 0;
+}
+
+/* ======================================================= */
+/* 1. Header and Controls */
+/* ======================================================= */
+.dash__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+.dash__controls {
+    display: flex;
+    align-items: center;
+}
+
+.dash__filter {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    font-size: 0.9rem;
+}
+
+.dash__filter span {
+    margin-right: 5px;
+    color: var(--text-secondary);
+}
+
+.dash__filter input[type="date"] {
+    padding: 5px 8px;
+    border: 1px solid var(--bg-accent);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.dash__tilde {
+    margin: 0 5px;
+    color: var(--text-secondary);
+}
+
+/* Buttons and Upload */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn--primary {
+    background-color: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+.btn--primary:hover {
+    background-color: #72cfcd;
+}
+
+.btn--upload {
+    background-color: var(--bg-accent);
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn--upload input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.btn--upload:hover {
+    background-color: #555877;
+}
+
+
+/* ======================================================= */
+/* 2. KPI Section */
+/* ======================================================= */
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.kpi {
+    background-color: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 5px solid var(--bg-accent);
+}
+
+.kpi__label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.kpi__value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.kpi--accent {
+    border-left-color: var(--color-warn);
+}
+.kpi--accent .kpi__value {
+    color: var(--color-warn);
+}
+
+.kpi--ghost {
+    border-left-color: var(--color-primary);
+}
+.kpi--ghost .kpi__value {
+    font-size: 1.2rem;
+    color: var(--color-primary);
+}
+
+
+/* ======================================================= */
+/* 3. Grid Layouts and Panels */
+/* ======================================================= */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.panel {
+    background-color: var(--bg-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+.panel__title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bg-accent);
+}
+
+.chart {
+    flex-grow: 1;
+    min-height: 250px;
+    position: relative;
+}
+
+.chart--line {
+    /* 라인 차트 영역 조정 */
+    min-height: 300px;
+}
+
+/* ======================================================= */
+/* 4. PPM Panel */
+/* ======================================================= */
+.panel--ppm {
+    justify-content: center;
+    align-items: center;
+    min-height: 400px; /* 도넛 차트와 높이 맞추기 */
+    text-align: center;
+}
+
+.ppm__title {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.ppm__value {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--color-danger); /* PPM은 위험 색상으로 강조 */
+    text-shadow: 0 0 10px rgba(226, 59, 71, 0.5);
+    line-height: 1;
+}
+
+.ppm__sub {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+/* ======================================================= */
+/* 5. Realtime Line Chart & Alert Badge */
+/* ======================================================= */
+.alarm-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: var(--color-danger);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    line-height: 1;
+    animation: pulse 1.5s infinite;
+    z-index: 10;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(226, 59, 71, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(226, 59, 71, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(226, 59, 71, 0);
+    }
+}
+
+/* ======================================================= */
+/* 6. Alert List Panel (경고 목록) */
+/* ======================================================= */
+.panel--alerts {
+    /* 라인차트와 높이 맞추기 */
+    min-height: 400px;
+}
+
+.alerts__title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bg-accent);
+}
+
+.alerts__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    overflow-y: auto; /* 경고 목록 스크롤 */
+    max-height: 250px; /* 최대 높이 설정 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.alerts__empty {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 20px;
+    background-color: #27293d;
+    border-radius: 6px;
+}
+
+.alerts__item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 0.95rem;
+}
+
+.ppm__wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+}
+/* 경고 등급별 배경 및 텍스트 스타일 */
+.alerts__item--light_warn {
+    background-color: rgba(255, 204, 0, 0.1);
+    border-left: 5px solid var(--color-warn);
+}
+.alerts__item--warn {
+    background-color: rgba(255, 136, 136, 0.15);
+    border-left: 5px solid #ff8888; /* 주황-빨강 계열 */
+}
+.alerts__item--danger {
+    background-color: rgba(226, 59, 71, 0.25); /* 진하게 */
+    border-left: 5px solid var(--color-danger); /* 가장 진한 경고색 */
+    animation: blink-border 2s ease-in-out infinite; /* 깜빡임 효과 추가 */
+}
+
+@keyframes blink-border {
+    0%, 100% { border-left-color: var(--color-danger); }
+    50% { border-left-color: #aa1111; }
+}
+
+.alerts__icon {
+    margin-right: 10px;
+    line-height: 1;
+}
+
+.alerts__text {
+    flex-grow: 1;
+    color: var(--text-primary);
+}
+.alerts__text strong {
+    color: var(--color-success);
+}
+
+/* 경고 횟수 배지 스타일 */
+.alerts__pill {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 15px;
+    white-space: nowrap;
+}
+
+.alerts__pill--light_warn {
+    background-color: var(--color-warn);
+    color: #333;
+}
+.alerts__pill--warn {
+    background-color: #ff8888;
+    color: #333;
+}
+.alerts__pill--danger {
+    background-color: var(--color-pill-danger); /* 진한 빨강 */
+    color: var(--color-pill-text);
+}
+
+
+/* 하단 경보 배지 */
+.alerts__badge {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.alerts__badge--danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+.alerts__badge--blink {
+    animation: badge-blink 1s ease-in-out infinite alternate;
+}
+@keyframes badge-blink {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+}
+
+
+/* ======================================================= */
+/* 7. Bottom Charts (Area/Line) - 압출헤드, 스크류피쳐 */
+/* ======================================================= */
+.chart-scroll {
+    overflow-x: auto; /* X축 스크롤 가능하게 */
+    padding-bottom: 20px; /* 스크롤바 공간 확보 */
+}
+
+.chart-scroll__inner {
+    width: 100%;
+    min-width: 100%; /* 기본적으로 패널 폭 채움 */
+    height: 380px; /* 차트 높이 고정 */
+}
+
+/* Recharts Tooltip Customization (배경색을 어둡게 설정하여 가독성 높임) */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: var(--bg-primary) !important;
+    border: 1px solid var(--bg-accent) !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.recharts-tooltip-wrapper .recharts-tooltip-item-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.recharts-tooltip-wrapper .recharts-tooltip-label {
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+#normal .recharts-tooltip-item {
+    color: var(--text-primary) !important;
+}
